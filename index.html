@@ -1,0 +1,789 @@
+
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Алгоритмічна лабораторія — Сортування</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+
+:root {
+  --bg: #101629;
+  --panel: #1b2540;
+  --panel2: #253250;
+  --text: #f3f5ff;
+  --muted: #aab6d0;
+  --blue: #65b7ff;
+  --purple: #aa8cff;
+  --green: #5be0ad;
+  --orange: #ffb45e;
+  --red: #ff7188;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Nunito', sans-serif;
+}
+
+header {
+  padding: 25px 18px;
+  text-align: center;
+  background: linear-gradient(120deg,#253d72,#392b69,#172c50);
+}
+
+header .tag {
+  color: #a9cfff;
+  font-size: 12px;
+  letter-spacing: 3px;
+  font-weight: 900;
+}
+
+h1 {
+  margin: 8px 0;
+  font-size: clamp(25px,5vw,39px);
+}
+
+header p { color: #d2dcf5; margin: 5px; }
+
+main {
+  max-width: 1050px;
+  margin: auto;
+  padding: 20px 15px 50px;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid #344363;
+  border-radius: 17px;
+  padding: 20px;
+  margin-bottom: 17px;
+}
+
+h2 {
+  font-size: 20px;
+  margin: 0 0 14px;
+}
+
+h3 { margin: 0 0 8px; }
+
+.muted { color: var(--muted); }
+
+.methods {
+  display: grid;
+  grid-template-columns: repeat(2,1fr);
+  gap: 12px;
+}
+
+.method {
+  padding: 17px;
+  border: 2px solid #3b4969;
+  background: var(--panel2);
+  color: var(--text);
+  border-radius: 13px;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.method.active {
+  border-color: var(--blue);
+  background: #293f65;
+}
+
+.method strong { display:block; font-size: 17px; }
+.method small { color: var(--muted); }
+
+button {
+  border: 0;
+  border-radius: 10px;
+  padding: 11px 16px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: .2s;
+}
+
+button:hover { filter: brightness(1.13); transform: translateY(-1px); }
+button:disabled { opacity:.4; cursor:not-allowed; transform:none; }
+
+.primary { background: var(--blue); color:#10213b; }
+.secondary { background:#344363; color:white; }
+.green { background:var(--green); color:#102c27; }
+.orange { background:var(--orange); color:#39200b; }
+
+input {
+  background:#111b30;
+  color:white;
+  border:1px solid #465675;
+  padding:11px;
+  border-radius:9px;
+  font:inherit;
+  width:100%;
+}
+
+.input-row {
+  display:flex;
+  gap:9px;
+  margin-top:12px;
+}
+
+.input-row input { flex:1; min-width:0; }
+
+.controls {
+  display:flex;
+  gap:9px;
+  flex-wrap:wrap;
+  margin:15px 0;
+}
+
+.stats {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin:15px 0;
+}
+
+.stat {
+  background:#111b30;
+  border-radius:12px;
+  padding:13px;
+  text-align:center;
+}
+
+.stat span {
+  display:block;
+  color:var(--muted);
+  font-size:12px;
+}
+
+.stat strong {
+  font-size:25px;
+}
+
+.chart {
+  height:245px;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  gap:8px;
+  padding:15px 8px 0;
+  border-bottom:2px solid #60708f;
+  background:repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 48px,
+    #ffffff0b 49px
+  );
+  overflow:hidden;
+}
+
+.bar-wrap {
+  flex:1;
+  max-width:65px;
+  min-width:10px;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-end;
+}
+
+.bar {
+  width:100%;
+  min-height:12px;
+  background:linear-gradient(180deg,#65b7ff,#5474df);
+  border-radius:7px 7px 0 0;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  padding-top:5px;
+  color:white;
+  font-weight:900;
+  font-size:13px;
+  transition:height .3s, background .3s;
+}
+
+.bar.compare { background:var(--orange); }
+.bar.swap { background:var(--red); }
+.bar.sorted { background:var(--green); color:#102c27; }
+.bar.pivot { background:var(--purple); }
+
+.bar-index {
+  font-size:10px;
+  color:var(--muted);
+  padding:5px 0;
+}
+
+.legend {
+  display:flex;
+  gap:14px;
+  flex-wrap:wrap;
+  font-size:12px;
+  color:var(--muted);
+  margin-top:12px;
+}
+
+.dot {
+  display:inline-block;
+  width:10px;
+  height:10px;
+  border-radius:3px;
+  margin-right:5px;
+}
+
+.explanation {
+  padding:15px;
+  background:#111b30;
+  border-left:4px solid var(--purple);
+  border-radius:8px;
+  line-height:1.6;
+  min-height:65px;
+}
+
+.code {
+  background:#101b30;
+  border-radius:10px;
+  padding:15px;
+  overflow-x:auto;
+  color:#c6dcff;
+  font-family:monospace;
+  line-height:1.8;
+  white-space:pre-wrap;
+}
+
+.quiz-option {
+  display:block;
+  padding:12px;
+  background:var(--panel2);
+  border:1px solid #405070;
+  border-radius:9px;
+  margin:8px 0;
+  cursor:pointer;
+}
+
+.quiz-option:hover { border-color:var(--blue); }
+.quiz-option input { width:auto; margin-right:9px; }
+
+#feedback {
+  margin-top:12px;
+  font-weight:800;
+}
+
+footer {
+  text-align:center;
+  color:var(--muted);
+  padding:20px;
+  font-size:12px;
+}
+
+@media(max-width:600px) {
+  .methods { grid-template-columns:1fr; }
+  .stats { grid-template-columns:repeat(3,1fr); }
+  .stat strong { font-size:20px; }
+  .chart { height:200px; gap:3px; padding-left:2px; padding-right:2px; }
+  .bar { font-size:10px; }
+  .panel { padding:14px; }
+  .input-row { flex-direction:column; }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="tag">DIGITAL LAB • INFORMATИКА</div>
+  <h1>⚡ АЛГОРИТМІЧНА ЛАБОРАТОРІЯ</h1>
+  <p>Місія: впорядкувати дані!</p>
+</header>
+
+<main>
+
+<section class="panel">
+  <h2>🎯 Твоя місія</h2>
+  <p class="muted">
+    Уяви, що ти програміст. Перед тобою список невпорядкованих
+    чисел. Твоє завдання — розташувати їх від найменшого до
+    найбільшого за допомогою двох алгоритмів сортування.
+  </p>
+  <p><strong>Досліди:</strong> який алгоритм виконує менше порівнянь та обмінів?</p>
+</section>
+
+<section class="panel">
+  <h2>01. Обери алгоритм</h2>
+  <div class="methods">
+    <button class="method active" id="selectMethod" onclick="chooseMethod('selection')">
+      <strong>🔎 Метод вибору</strong>
+      <small>Знаходимо найменший елемент і ставимо його на потрібне місце.</small>
+    </button>
+    <button class="method" id="bubbleMethod" onclick="chooseMethod('bubble')">
+      <strong>🫧 Метод обміну</strong>
+      <small>Порівнюємо сусідні елементи та міняємо їх місцями.</small>
+    </button>
+  </div>
+</section>
+
+<section class="panel">
+  <h2>02. Підготуй дані</h2>
+  <p class="muted">Введи числа через кому або створи випадковий список.</p>
+
+  <div class="input-row">
+    <input id="numbersInput" value="8, 3, 6, 1, 9, 4, 2, 7"
+      aria-label="Список чисел">
+    <button class="primary" onclick="loadCustom()">Застосувати</button>
+  </div>
+
+  <div class="controls">
+    <button class="secondary" onclick="randomData()">🎲 Нові числа</button>
+    <button class="secondary" onclick="resetSort()">↺ Скинути</button>
+  </div>
+  <p id="inputError" style="color:var(--red)"></p>
+</section>
+
+<section class="panel">
+  <h2>03. Спостерігай за сортуванням</h2>
+
+  <div class="stats">
+    <div class="stat">
+      <span>Порівняння</span>
+      <strong id="comparisons">0</strong>
+    </div>
+    <div class="stat">
+      <span>Обміни</span>
+      <strong id="swaps">0</strong>
+    </div>
+    <div class="stat">
+      <span>Крок</span>
+      <strong id="steps">0</strong>
+    </div>
+  </div>
+
+  <div class="chart" id="chart"></div>
+
+  <div class="legend">
+    <span><i class="dot" style="background:#65b7ff"></i>Необроблені</span>
+    <span><i class="dot" style="background:#ffb45e"></i>Порівнюються</span>
+    <span><i class="dot" style="background:#ff7188"></i>Обмін</span>
+    <span><i class="dot" style="background:#5be0ad"></i>Відсортовані</span>
+    <span><i class="dot" style="background:#aa8cff"></i>Поточний мінімум</span>
+  </div>
+
+  <div class="controls">
+    <button class="primary" id="nextBtn" onclick="nextStep()">▶ Наступний крок</button>
+    <button class="green" id="autoBtn" onclick="autoSort()">⚡ Автоматично</button>
+    <button class="orange" onclick="pauseSort()">Ⅱ Пауза</button>
+  </div>
+
+  <div class="explanation" id="explanation">
+    Обери алгоритм та натисни «Наступний крок», щоб розпочати!
+  </div>
+</section>
+
+<section class="panel">
+  <h2>04. Як працює алгоритм?</h2>
+  <div id="algorithmDescription">
+    <h3>🔎 Сортування методом вибору</h3>
+    <p class="muted">
+      На кожному проході алгоритм шукає найменший елемент
+      серед невідсортованих чисел і міняє його місцями
+      з першим елементом цієї частини списку.
+    </p>
+    <div class="code">1. Вибрати перший невідсортований елемент.
+2. Знайти найменший елемент праворуч.
+3. Поміняти їх місцями.
+4. Повторювати, доки список не буде впорядкований.</div>
+  </div>
+</section>
+
+<section class="panel">
+  <h2>05. Перевір себе 🧠</h2>
+  <p><strong>Запитання 1.</strong> Що відбувається під час сортування методом вибору?</p>
+
+  <label class="quiz-option">
+    <input type="radio" name="q1" value="a">
+    Випадкові числа переставляються місцями.
+  </label>
+  <label class="quiz-option">
+    <input type="radio" name="q1" value="b">
+    Знаходиться найменший елемент і переміщується на потрібну позицію.
+  </label>
+  <label class="quiz-option">
+    <input type="radio" name="q1" value="c">
+    Усі числа видаляються і створюється новий список.
+  </label>
+
+  <p><strong>Запитання 2.</strong> Які елементи порівнюються методом обміну?</p>
+
+  <label class="quiz-option">
+    <input type="radio" name="q2" value="a">
+    Сусідні елементи списку.
+  </label>
+  <label class="quiz-option">
+    <input type="radio" name="q2" value="b">
+    Лише перший та останній елементи.
+  </label>
+  <label class="quiz-option">
+    <input type="radio" name="q2" value="c">
+    Тільки найбільші числа.
+  </label>
+
+  <p><strong>Запитання 3.</strong> Що означає обмін елементів?</p>
+
+  <label class="quiz-option">
+    <input type="radio" name="q3" value="a">
+    Видалення елементів зі списку.
+  </label>
+  <label class="quiz-option">
+    <input type="radio" name="q3" value="b">
+    Зміна їхніх значень на нуль.
+  </label>
+  <label class="quiz-option">
+    <input type="radio" name="q3" value="c">
+    Зміна місць двох елементів.
+  </label>
+
+  <button class="green" onclick="checkQuiz()">Перевірити відповіді</button>
+  <div id="feedback"></div>
+</section>
+
+<section class="panel">
+  <h2>🏆 Фінальний виклик</h2>
+  <p>Спробуй виконати дослідження самостійно:</p>
+  <ol class="muted">
+    <li>Відсортуй один список методом вибору.</li>
+    <li>Скинь список та застосуй метод обміну.</li>
+    <li>Порівняй кількість порівнянь і обмінів.</li>
+    <li>Зроби висновок: чим відрізняються ці алгоритми?</li>
+  </ol>
+</section>
+
+</main>
+
+<footer>АЛГОРИТМІЧНА ЛАБОРАТОРІЯ • Вивчай. Досліджуй. Програмуй.</footer>
+
+<script>
+let original = [8,3,6,1,9,4,2,7];
+let arr = [...original];
+let method = 'selection';
+let operations = [];
+let pointer = 0;
+let comparisons = 0;
+let swaps = 0;
+let step = 0;
+let timer = null;
+let finished = false;
+
+function chooseMethod(value) {
+  pauseSort();
+  method = value;
+
+  document.getElementById('selectMethod').classList.toggle(
+    'active', value === 'selection'
+  );
+  document.getElementById('bubbleMethod').classList.toggle(
+    'active', value === 'bubble'
+  );
+
+  document.getElementById('algorithmDescription').innerHTML =
+    value === 'selection'
+    ? `<h3>🔎 Сортування методом вибору</h3>
+       <p class="muted">Шукаємо найменше число серед невідсортованих
+       елементів і ставимо його на наступну позицію.</p>
+       <div class="code">1. Вибрати позицію.
+2. Знайти мінімум праворуч.
+3. Обміняти елементи.
+4. Перейти до наступної позиції.</div>`
+    : `<h3>🫧 Сортування методом обміну</h3>
+       <p class="muted">Порівнюємо сусідні числа. Якщо ліве більше
+       за праве — міняємо їх місцями.</p>
+       <div class="code">1. Порівняти сусідні елементи.
+2. Якщо лівий більший — обміняти.
+3. Повторити прохід.
+4. Повторювати, доки список не буде відсортований.</div>`;
+
+  resetSort();
+}
+
+function generateOperations() {
+  let a = [...original];
+  let ops = [];
+
+  if (method === 'selection') {
+    for (let i = 0; i < a.length - 1; i++) {
+      let min = i;
+
+      for (let j = i + 1; j < a.length; j++) {
+        ops.push({
+          type:'compare',
+          a:j,
+          b:min,
+          sorted:i
+        });
+
+        if (a[j] < a[min]) {
+          min = j;
+          ops.push({
+            type:'minimum',
+            a:min,
+            b:i,
+            sorted:i
+          });
+        }
+      }
+
+      if (min !== i) {
+        [a[i],a[min]] = [a[min],a[i]];
+        ops.push({
+          type:'swap',
+          a:i,
+          b:min,
+          sorted:i
+        });
+      }
+
+      ops.push({type:'pass',sorted:i+1});
+    }
+    ops.push({type:'done',sorted:a.length});
+  }
+
+  if (method === 'bubble') {
+    for (let i = 0; i < a.length - 1; i++) {
+      let changed = false;
+
+      for (let j = 0; j < a.length - 1 - i; j++) {
+        ops.push({
+          type:'compare',
+          a:j,
+          b:j+1,
+          sorted:a.length-1-i
+        });
+
+        if (a[j] > a[j+1]) {
+          [a[j],a[j+1]] = [a[j+1],a[j]];
+          changed = true;
+
+          ops.push({
+            type:'swap',
+            a:j,
+            b:j+1,
+            sorted:a.length-1-i
+          });
+        }
+      }
+
+      ops.push({type:'pass',sorted:a.length-i});
+      if (!changed) break;
+    }
+
+    ops.push({type:'done',sorted:a.length});
+  }
+
+  return ops;
+}
+
+function resetSort() {
+  pauseSort();
+  arr = [...original];
+  operations = generateOperations();
+  pointer = 0;
+  comparisons = 0;
+  swaps = 0;
+  step = 0;
+  finished = false;
+
+  updateStats();
+  render();
+  document.getElementById('explanation').textContent =
+    'Готово до старту! Натисни «Наступний крок» або «Автоматично».';
+  document.getElementById('nextBtn').disabled = false;
+}
+
+function render(highlight = null) {
+  const chart = document.getElementById('chart');
+  chart.innerHTML = '';
+
+  const max = Math.max(...arr, 1);
+
+  arr.forEach((value,index) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'bar-wrap';
+
+    const bar = document.createElement('div');
+    bar.className = 'bar';
+
+    if (highlight) {
+      if (highlight.sorted !== undefined && index >= highlight.sorted) {
+        bar.classList.add('sorted');
+      }
+
+      if (index === highlight.a || index === highlight.b) {
+        bar.classList.add(
+          highlight.type === 'swap' ? 'swap' :
+          highlight.type === 'minimum' ? 'pivot' : 'compare'
+        );
+      }
+    }
+
+    bar.style.height = (value / max * 85 + 5) + '%';
+    bar.textContent = value;
+
+    const label = document.createElement('div');
+    label.className = 'bar-index';
+    label.textContent = index + 1;
+
+    wrap.appendChild(bar);
+    wrap.appendChild(label);
+    chart.appendChild(wrap);
+  });
+}
+
+function updateStats() {
+  document.getElementById('comparisons').textContent = comparisons;
+  document.getElementById('swaps').textContent = swaps;
+  document.getElementById('steps').textContent = step;
+}
+
+function nextStep() {
+  if (finished || pointer >= operations.length) return;
+
+  const op = operations[pointer];
+  pointer++;
+  step++;
+
+  if (op.type === 'compare') {
+    comparisons++;
+    document.getElementById('explanation').textContent =
+      `Крок ${step}: порівнюємо числа ${arr[op.a]} та ${arr[op.b]}. ` +
+      (arr[op.a] <= arr[op.b]
+      ? 'Порядок правильний.'
+      : 'Перевіряємо, чи потрібен обмін.');
+  }
+
+  if (op.type === 'minimum') {
+    document.getElementById('explanation').textContent =
+      `Знайдено новий найменший елемент: ${arr[op.a]}. ` +
+      'Запам’ятовуємо його позицію.';
+  }
+
+  if (op.type === 'swap') {
+    const x = arr[op.a];
+    const y = arr[op.b];
+    [arr[op.a],arr[op.b]] = [arr[op.b],arr[op.a]];
+    swaps++;
+
+    document.getElementById('explanation').textContent =
+      `Обмін! Числа ${x} та ${y} помінялися місцями.`;
+  }
+
+  if (op.type === 'pass') {
+    document.getElementById('explanation').textContent =
+      'Прохід завершено. Переходимо до наступної частини списку.';
+  }
+
+  if (op.type === 'done') {
+    finished = true;
+    document.getElementById('explanation').textContent =
+      `🎉 Місію виконано! Список відсортовано: ${arr.join(', ')}. ` +
+      `Порівнянь: ${comparisons}, обмінів: ${swaps}.`;
+  }
+
+  render(op);
+  updateStats();
+
+  if (finished) {
+    pauseSort();
+    document.getElementById('nextBtn').disabled = true;
+  }
+}
+
+function autoSort() {
+  if (finished) resetSort();
+  if (timer) return;
+
+  timer = setInterval(() => {
+    nextStep();
+    if (finished) pauseSort();
+  }, 650);
+}
+
+function pauseSort() {
+  if (timer) {
+    clearInterval(timer);
+    timer = null;
+  }
+}
+
+function loadCustom() {
+  const input = document.getElementById('numbersInput').value;
+  const values = input.split(',').map(x => x.trim());
+
+  const numbers = values.map(Number);
+
+  if (
+    values.length < 2 ||
+    values.length > 15 ||
+    values.some(x => x === '') ||
+    numbers.some(x => !Number.isInteger(x) || x < 1 || x > 100)
+  ) {
+    document.getElementById('inputError').textContent =
+      'Введи від 2 до 15 цілих чисел від 1 до 100 через кому.';
+    return;
+  }
+
+  document.getElementById('inputError').textContent = '';
+  original = numbers;
+  resetSort();
+}
+
+function randomData() {
+  original = Array.from(
+    {length:8},
+    () => Math.floor(Math.random()*90)+10
+  );
+
+  document.getElementById('numbersInput').value = original.join(', ');
+  document.getElementById('inputError').textContent = '';
+  resetSort();
+}
+
+function checkQuiz() {
+  const answers = {q1:'b',q2:'a',q3:'c'};
+  let score = 0;
+  let answered = 0;
+
+  for (const q in answers) {
+    const selected = document.querySelector(
+      `input[name="${q}"]:checked`
+    );
+
+    if (selected) {
+      answered++;
+      if (selected.value === answers[q]) score++;
+    }
+  }
+
+  const feedback = document.getElementById('feedback');
+
+  if (answered < 3) {
+    feedback.style.color = 'var(--orange)';
+    feedback.textContent = 'Відповідай на всі три запитання!';
+    return;
+  }
+
+  feedback.style.color = score === 3 ? 'var(--green)' : 'var(--orange)';
+  feedback.textContent =
+    `Твій результат: ${score} із 3. ` +
+    (score === 3 ? '🏆 Чудова робота!' : 'Спробуй ще раз!');
+}
+
+render();
+</script>
+
+</body>
+</html>
